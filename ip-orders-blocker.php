@@ -3,7 +3,7 @@
 /**
  * Plugin Name:       Order blocker by IP
  * Description:       Block new woocommerce orders by ip address
- * Version:           1.0.3
+ * Version:           1.0.4
  * Requires at least: 5.7
  * Requires PHP:      7.4
  * Author:            Randall Brenes

@@ -70,6 +70,9 @@ class Blocker
 
 	public function get_placeholders(string $setting = '', string $message = ''): array
 	{
+		
+		$ipInfo = ip_blocker_get_client_ip();
+		$ipAddress = $ipInfo['address'];
 		$date_format  = get_option('date_format');
 		$time_format  = get_option('time_format');
 		$current      = $this->get_interval_start();
@@ -84,6 +87,7 @@ class Blocker
 			'{next_interval:date}'    => $next->format($date_format),
 			'{next_interval:time}'    => $next->format($time_format),
 			'{timezone}'              => $next->format('T'),
+			'{ip}'              => $ipAddress,
 		];
 
 		return apply_filters('limit_orders_message_placeholders', $placeholders, $setting, $message);
@@ -106,9 +110,10 @@ class Blocker
 				'wc-on-hold',
 				'wc-processing',
 				'wc-pending'
-			), 'date_created' =>  '>'.$this->getOrderIntervalTimestamp(), 'ip_address' => $ipAddress
+			),
+			'date_created' => '>'.$this->getOrderIntervalTimestamp(),
+			'customer_ip_address' => $ipAddress
 		);
-		
 		
 		$wcOrders = wc_get_orders($args);
 		$ordersCount = count($wcOrders);
@@ -326,12 +331,16 @@ class Blocker
 		if (empty($order_types)) {
 			throw new EmptyOrderTypesError('No order types were found.');
 		}
+		
+		$ipInfo = ip_blocker_get_client_ip();
+		$ipAddress = $ipInfo['address'];
 
 		$orders = wc_get_orders([
 			'type'         => $order_types,
 			'date_created' => '>=' . $this->get_interval_start()->getTimestamp(),
 			'return'       => 'ids',
 			'limit'        => max($this->get_limit(), 1000),
+			'customer_ip_address' => $ipAddress
 		]);
 
 		return count($orders);
